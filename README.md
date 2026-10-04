@@ -1,8 +1,8 @@
-# 📚 Smart Timetable AI
+# 📚 FocusGrid
 
 An AI-powered student timetable management website built using **Python (Flask), HTML, CSS, JavaScript, and SQLite**.
 
-Smart Timetable AI helps students organize their studies by managing homework, assignments, exams, attendance, and generating a personalized study timetable.
+FocusGrid helps students organize their studies by managing homework, assignments, exams, attendance, and generating a personalized study timetable.
 
 ---
 
@@ -37,7 +37,7 @@ Smart Timetable AI helps students organize their studies by managing homework, a
 ## 📂 Project Structure
 
 ```
-Smart-Timetable-AI/
+FocusGrid/
 │
 ├── app.py
 ├── timetable_ai.db
@@ -68,7 +68,7 @@ Smart-Timetable-AI/
 Open your browser
 
 ```
-https://student-timetable-ai.onrender.com/
+[Open FocusGrid](https://student-timetable-ai.onrender.com/)
 ```
 
 

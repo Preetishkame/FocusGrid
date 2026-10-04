@@ -1,9 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
+from flask import Flask, make_response, render_template, request, redirect, url_for, session, flash, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from datetime import datetime
 import os
 import re
+import sqlite3
 
 try:
     import psycopg2
@@ -13,6 +14,53 @@ except ImportError:
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "student_timetable_ai_secret_key")
+# Keep edited templates visible during local use even when Flask debug mode is off.
+app.config["TEMPLATES_AUTO_RELOAD"] = True
+
+LOCAL_DB_PATH = os.environ.get(
+    "LOCAL_SQLITE_PATH",
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "student_timetable_test.db")
+)
+
+
+class SQLiteCompatCursor:
+    """Translate the app's small PostgreSQL SQL subset for local SQLite testing."""
+    def __init__(self, cursor):
+        self._cursor = cursor
+
+    @staticmethod
+    def _sqlite_sql(sql):
+        sql = re.sub(r"\bBIGSERIAL\s+PRIMARY\s+KEY\b", "INTEGER PRIMARY KEY AUTOINCREMENT", sql, flags=re.I)
+        sql = re.sub(r"\bTIMESTAMPTZ\b", "TEXT", sql, flags=re.I)
+        sql = re.sub(r"\bDOUBLE\s+PRECISION\b", "REAL", sql, flags=re.I)
+        sql = re.sub(r"\bBIGINT\b", "INTEGER", sql, flags=re.I)
+        sql = re.sub(r"\bILIKE\b", "LIKE", sql, flags=re.I)
+        return sql.replace("%s", "?")
+
+    def execute(self, sql, params=()):
+        self._cursor.execute(self._sqlite_sql(sql), params)
+        return self
+
+    def fetchone(self): return self._cursor.fetchone()
+    def fetchall(self): return self._cursor.fetchall()
+    def __enter__(self): return self
+    def __exit__(self, exc_type, exc, tb): self._cursor.close()
+
+
+class SQLiteCompatConnection:
+    def __init__(self, path):
+        self._connection = sqlite3.connect(path, timeout=10)
+        self._connection.row_factory = sqlite3.Row
+        self._connection.execute("PRAGMA foreign_keys = ON")
+
+    def cursor(self): return SQLiteCompatCursor(self._connection.cursor())
+    def commit(self): return self._connection.commit()
+    def rollback(self): return self._connection.rollback()
+    def close(self): return self._connection.close()
+
+
+def using_local_sqlite():
+    return not os.environ.get("DATABASE_URL", "").strip()
 
 # Render PostgreSQL provides DATABASE_URL automatically when the database is linked.
 # Local development can also use DATABASE_URL from a .env/environment variable.
@@ -33,7 +81,10 @@ def get_database_url():
 
 
 def get_db():
-    """Open a PostgreSQL connection and return it with dictionary-like rows."""
+    """Use local SQLite for development; use Render PostgreSQL when DATABASE_URL exists."""
+    if using_local_sqlite():
+        return SQLiteCompatConnection(LOCAL_DB_PATH)
+
     if psycopg2 is None:
         raise RuntimeError("psycopg2 is not installed. Add psycopg2-binary to requirements.txt.")
 
@@ -143,6 +194,17 @@ def init_db():
                 )
             """)
             cur.execute("""
+                CREATE TABLE IF NOT EXISTS revision_items (
+                    id BIGSERIAL PRIMARY KEY,
+                    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    exam_id BIGINT NOT NULL REFERENCES exams(id) ON DELETE CASCADE,
+                    topic TEXT NOT NULL,
+                    planned_date TEXT,
+                    completed BOOLEAN NOT NULL DEFAULT FALSE,
+                    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+            cur.execute("""
                 CREATE TABLE IF NOT EXISTS attendance (
                     id BIGSERIAL PRIMARY KEY,
                     user_id BIGINT UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -221,8 +283,11 @@ def register():
                 "INSERT INTO users(name, email, password) VALUES(%s, %s, %s)",
                 (name, email, hashed)
             )
-        except psycopg2.errors.UniqueViolation:
-            return jsonify({"success": False, "message": "An account with this email already exists."}), 409
+        except Exception:
+            # SQLite and PostgreSQL report unique conflicts with different exception types.
+            if query_one("SELECT id FROM users WHERE LOWER(email) = LOWER(%s)", (email,)):
+                return jsonify({"success": False, "message": "An account with this email already exists."}), 409
+            raise
 
         return jsonify({"success": True, "message": "Registration Successful!"})
 
@@ -267,7 +332,9 @@ def logout():
 @app.route("/dashboard")
 @login_required
 def dashboard():
-    return render_template("dashboard.html", username=session["user_name"])
+    response = make_response(render_template("dashboard.html", username=session["user_name"]))
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    return response
 
 
 # -------------------------------
@@ -344,54 +411,89 @@ def search_subjects():
 # ============================================
 # SMART TIMETABLE
 # ============================================
-def generate_timetable(user_id):
+def generate_timetable(user_id, start_time="16:00", end_time="22:00", days=None, break_minutes=15):
     subjects_rows = query_all("SELECT * FROM subjects WHERE user_id=%s ORDER BY id", (user_id,))
+
+    if not subjects_rows:
+        return 0
+
+    days = days or ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    today = datetime.now().strftime("%A")
+    if today in days:
+        today_index = days.index(today)
+        days = days[today_index:] + days[:today_index]
+    start_minutes = int(start_time[:2]) * 60 + int(start_time[3:])
+    end_minutes = int(end_time[:2]) * 60 + int(end_time[3:])
+    available_minutes = end_minutes - start_minutes
+    if available_minutes <= 0:
+        raise ValueError("End time must be later than start time.")
+
+    durations = []
+    for subject in subjects_rows:
+        try:
+            hours = float(subject["study_hours"] or 1)
+        except (TypeError, ValueError):
+            hours = 1
+        if subject["difficulty"] == "Hard":
+            hours += 0.5
+        duration = max(30, int(round(hours * 60 / 30) * 30))
+        if duration > available_minutes:
+            raise ValueError(f"{subject['subject_name']} needs more time than your selected daily study window.")
+        durations.append(duration)
 
     conn = get_db()
     try:
         with conn.cursor() as cur:
             cur.execute("DELETE FROM timetable WHERE user_id=%s", (user_id,))
-            days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
-            current_day = 0
-            start_hour = 17
-
-            for subject in subjects_rows:
-                try:
-                    hrs = float(subject["study_hours"] or 1)
-                except (TypeError, ValueError):
-                    hrs = 1
-
-                if subject["difficulty"] == "Hard":
-                    hrs += 1
-                hrs = min(hrs, 3)
-
-                start = start_hour
-                end = start + hrs
-                start_text = f"{int(start):02d}:00"
-                if float(end).is_integer():
-                    end_text = f"{int(end):02d}:00"
-                else:
-                    end_text = f"{int(end):02d}:30"
-
+            cursors = {day: start_minutes for day in days}
+            session_counts = {day: 0 for day in days}
+            for subject, duration in zip(subjects_rows, durations):
+                # Balance sessions across selected days, skipping days without enough room.
+                possible = [day for day in days if cursors[day] + duration <= end_minutes]
+                if not possible:
+                    raise ValueError("Your selected days and study hours do not fit all subjects. Add a day or widen your study window.")
+                day = min(possible, key=lambda candidate: (session_counts[candidate], cursors[candidate]))
+                start = cursors[day]
+                finish = start + duration
+                start_text = f"{start // 60:02d}:{start % 60:02d}"
+                end_text = f"{finish // 60:02d}:{finish % 60:02d}"
                 cur.execute("""
                     INSERT INTO timetable(user_id, day, start_time, end_time, subject)
                     VALUES(%s, %s, %s, %s, %s)
-                """, (user_id, days[current_day], start_text, end_text, subject["subject_name"]))
-
-                current_day = (current_day + 1) % len(days)
+                """, (user_id, day, start_text, end_text, subject["subject_name"]))
+                cursors[day] = finish + break_minutes
+                session_counts[day] += 1
         conn.commit()
     except Exception:
         conn.rollback()
         raise
     finally:
         conn.close()
+    return len(subjects_rows)
 
 
 @app.route("/api/timetable/generate", methods=["POST"])
 @login_required
 def create_timetable():
-    generate_timetable(session["user_id"])
-    return jsonify({"success": True, "message": "Timetable Generated Successfully"})
+    data = request.get_json(silent=True) or {}
+    valid_days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    days = [day for day in data.get("days", valid_days) if day in valid_days]
+    if not days:
+        return jsonify({"success": False, "message": "Select at least one study day."}), 400
+    start_time = data.get("start_time", "16:00")
+    end_time = data.get("end_time", "22:00")
+    try:
+        datetime.strptime(start_time, "%H:%M")
+        datetime.strptime(end_time, "%H:%M")
+        break_minutes = int(data.get("break_minutes", 15))
+        if not 0 <= break_minutes <= 120:
+            raise ValueError
+        total = generate_timetable(session["user_id"], start_time, end_time, days, break_minutes)
+    except ValueError as exc:
+        return jsonify({"success": False, "message": str(exc) or "Enter a valid time window and break length."}), 400
+    if not total:
+        return jsonify({"success": False, "message": "Add subjects before generating a timetable."}), 400
+    return jsonify({"success": True, "message": "Flexible timetable generated successfully."})
 
 
 @app.route("/api/timetable", methods=["GET", "DELETE"])
@@ -595,6 +697,64 @@ def upcoming_exams():
 
 
 # ============================================
+# EXAM REVISION PLAN
+# ============================================
+@app.route("/api/revisions", methods=["GET", "POST"])
+@login_required
+def revision_items():
+    uid = session["user_id"]
+    if request.method == "POST":
+        data = request.get_json(silent=True) or {}
+        topic = (data.get("topic") or "").strip()
+        try:
+            exam_id = int(data.get("exam_id"))
+        except (TypeError, ValueError):
+            return jsonify({"success": False, "message": "Choose an exam for this revision item."}), 400
+        planned_date = (data.get("planned_date") or "").strip() or None
+        if not topic:
+            return jsonify({"success": False, "message": "Enter a topic to revise."}), 400
+        if planned_date:
+            try:
+                datetime.strptime(planned_date, "%Y-%m-%d")
+            except ValueError:
+                return jsonify({"success": False, "message": "Choose a valid revision date."}), 400
+        exam = query_one("SELECT id FROM exams WHERE id=%s AND user_id=%s", (exam_id, uid))
+        if not exam:
+            return jsonify({"success": False, "message": "That exam was not found."}), 404
+        execute("""
+            INSERT INTO revision_items(user_id, exam_id, topic, planned_date)
+            VALUES(%s, %s, %s, %s)
+        """, (uid, exam_id, topic, planned_date))
+        return jsonify({"success": True, "message": "Revision item added."}), 201
+
+    rows = query_all("""
+        SELECT r.id, r.exam_id, r.topic, r.planned_date, r.completed,
+               e.subject AS exam_subject, e.exam_date
+        FROM revision_items r
+        JOIN exams e ON e.id=r.exam_id AND e.user_id=r.user_id
+        WHERE r.user_id=%s
+        ORDER BY e.exam_date ASC, r.planned_date ASC, r.id ASC
+    """, (uid,))
+    return jsonify([dict(row) for row in rows])
+
+
+@app.route("/api/revisions/<int:item_id>", methods=["PUT", "DELETE"])
+@login_required
+def revision_item_by_id(item_id):
+    uid = session["user_id"]
+    if request.method == "DELETE":
+        execute("DELETE FROM revision_items WHERE id=%s AND user_id=%s", (item_id, uid))
+        return jsonify({"success": True})
+
+    data = request.get_json(silent=True) or {}
+    completed = data.get("completed")
+    if not isinstance(completed, bool):
+        return jsonify({"success": False, "message": "Revision status must be complete or pending."}), 400
+    execute("UPDATE revision_items SET completed=%s WHERE id=%s AND user_id=%s", (completed, item_id, uid))
+    return jsonify({"success": True})
+
+
+# ============================================
 # ATTENDANCE
 # ============================================
 @app.route("/api/attendance", methods=["GET", "POST"])
@@ -697,14 +857,14 @@ def status():
         return jsonify({
             "status": "online",
             "database": "postgresql",
-            "application": "Student Timetable AI",
+            "application": "FocusGrid",
             "version": "3.0"
         })
     except Exception as exc:
         return jsonify({
             "status": "online",
             "database": "error",
-            "application": "Student Timetable AI",
+            "application": "FocusGrid",
             "version": "3.0",
             "error": str(exc) if app.debug else "Database connection failed"
         }), 503

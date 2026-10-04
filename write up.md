@@ -1,8 +1,8 @@
-# SMART TIMETABLE AI
+# FocusGrid
 
 ## 1. Introduction
 
-Smart Timetable AI is a web-based application designed to help students manage their studies and school activities in an organized way. Students often have to remember their timetable, homework, assignments, exams and attendance at the same time. Managing all these things can sometimes become difficult.
+FocusGrid is a web-based application designed to help students manage their studies and school activities in an organized way. Students often have to remember their timetable, homework, assignments, exams and attendance at the same time. Managing all these things can sometimes become difficult.
 
 This project provides a simple platform where students can organize their study timetable and keep track of important academic activities. It includes features such as **exam reminders, homework reminders, assignment reminders and an attendance calculator**.
 
@@ -10,7 +10,7 @@ The main aim of this project is to make student life more organized by bringing 
 
 ## 2. Objectives
 
-The main objectives of Smart Timetable AI are:
+The main objectives of FocusGrid are:
 
 * To help students create and manage their study timetable.
 * To remind students about upcoming examinations.
@@ -40,7 +40,7 @@ These technologies work together to create a functional and easy-to-use web appl
 
 ## 4. Working of the Project
 
-When the user opens the Smart Timetable AI website, they can access different features from the application. The user can enter their academic information and use the available tools according to their needs.
+When the user opens the FocusGrid website, they can access different features from the application. The user can enter their academic information and use the available tools according to their needs.
 
 The **Timetable** feature helps students organize their study schedule. The **Exam Reminder** helps them keep track of upcoming examinations. Similarly, students can add their **homework and assignments** so that they can remember and complete them on time.
 
@@ -82,7 +82,7 @@ The website is designed to be simple so that students can easily understand and 
 
 ## 6. Advantages
 
-Smart Timetable AI has several advantages for students. It brings different academic activities together in one application instead of requiring students to manage them separately.
+FocusGrid has several advantages for students. It brings different academic activities together in one application instead of requiring students to manage them separately.
 
 The reminder features can help students remember exams, homework and assignments. The timetable feature helps in planning study time, while the attendance calculator makes attendance calculation easier.
 
@@ -99,12 +99,12 @@ The project can be improved further in the future by adding more useful features
 * **Subject-wise Attendance:** Attendance could be calculated separately for each subject.
 * **Personalized Study Suggestions:** The application could provide study suggestions according to the student's schedule and pending work.
 
-These features can make Smart Timetable AI more useful as a complete student-management application.
+These features can make FocusGrid more useful as a complete student-management application.
 
 ## 8. Conclusion
 
-Smart Timetable AI is a useful student-management web application developed using **Python, Flask, HTML, CSS, JavaScript and PostgreSQL**. It provides multiple features such as a study timetable, exam reminders, homework reminders, assignment reminders and an attendance calculator.
+FocusGrid is a useful student-management web application developed using **Python, Flask, HTML, CSS, JavaScript and PostgreSQL**. It provides multiple features such as a study timetable, exam reminders, homework reminders, assignment reminders and an attendance calculator.
 
 Through this project, I learned the basics of Python programming, web development, database management and how frontend and backend components work together.
 
-The project helped me understand how technology can be used to solve everyday problems faced by students. Smart Timetable AI aims to make academic planning easier, more organized and more convenient for students.
+The project helped me understand how technology can be used to solve everyday problems faced by students. FocusGrid aims to make academic planning easier, more organized and more convenient for students.

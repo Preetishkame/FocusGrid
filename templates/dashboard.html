@@ -8,10 +8,10 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
-    <title>Dashboard | Smart Timetable AI</title>
+    <title>Dashboard | FocusGrid</title>
 
     <meta name="description"
-          content="Smart AI-powered student timetable, assignment, homework, exam and attendance manager.">
+          content="FocusGrid-powered student timetable, assignment, homework, exam and attendance manager.">
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='css/style.css') }}">
@@ -40,7 +40,7 @@
 
             <i class="fa-solid fa-brain"></i>
 
-            <span>Smart AI</span>
+            <span>FocusGrid</span>
 
         </div>
 
@@ -130,12 +130,15 @@
         <div>
 
             <h2>
-                Welcome,
+                Welcome to FocusGrid,
                 <span id="welcome-user">
                     Loading...
                 </span>
-                👋
             </h2>
+
+            <p id="focusgrid-tagline" aria-live="polite">
+                Grid Your Goals, Master Your Time.
+            </p>
 
             <p id="today-date"></p>
 
@@ -144,9 +147,10 @@
         <div class="topbar-actions">
 
             <input
-                type="text"
+                type="search"
                 id="searchBox"
-                placeholder="Search Subjects..."
+                placeholder="Search subjects..."
+                aria-label="Search subjects"
             >
 
             <button
@@ -186,7 +190,7 @@
 
     <section
         id="tab-dashboard"
-        class="tab-content">
+        class="tab-content active">
 
         <div class="dashboard-grid">
 
@@ -373,6 +377,80 @@
 
 
         <!-- ====================
+             STUDY GOAL, STREAK & RECOMMENDATIONS
+        ===================== -->
+        <div class="dashboard-grid">
+            <div class="widget">
+                <div class="widget-header">
+                    <h3><i class="fa-solid fa-bullseye"></i> Daily Study Goal</h3>
+                </div>
+                <label for="studyGoalHours">Goal (hours per day)</label>
+                <input type="number" id="studyGoalHours" min="0.25" max="24" step="0.25" value="2">
+                <p id="dailyStudyGoal" aria-live="polite">0.0 / 2.0 hrs</p>
+                <div class="progress-container" role="progressbar" aria-label="Daily study goal progress" aria-valuemin="0" aria-valuemax="100">
+                    <div id="studyGoalBar" class="progress-bar" style="width:0%" aria-valuenow="0"></div>
+                </div>
+                <div class="form-group" style="margin-top:12px">
+                    <label for="studyMinutes">Log study time (minutes)</label>
+                    <input type="number" id="studyMinutes" min="1" step="1" placeholder="30">
+                </div>
+                <button type="button" class="btn-primary" id="logStudySession">Log Study Session</button>
+            </div>
+
+            <div class="widget">
+                <div class="widget-header">
+                    <h3><i class="fa-solid fa-fire"></i> Study Streak</h3>
+                </div>
+                <p><strong><span id="studyStreak">0</span> day streak</strong></p>
+                <p>Log study time each day to keep your streak going.</p>
+            </div>
+
+            <div class="widget">
+                <div class="widget-header">
+                    <h3><i class="fa-solid fa-lightbulb"></i> Smart Study Recommendations</h3>
+                </div>
+                <div id="smartRecommendations" aria-live="polite">
+                    Recommendations will appear when your dashboard loads.
+                </div>
+            </div>
+        </div>
+        <div class="dashboard-grid dashboard-quick-view">
+            <div class="widget">
+                <div class="widget-header">
+                    <h3><i class="fa-solid fa-book-open"></i> Homework</h3>
+                </div>
+                <div id="dashboardHomeworkPreview" class="dashboard-preview-list">Loading homework…</div>
+            </div>
+            <div class="widget">
+                <div class="widget-header">
+                    <h3><i class="fa-solid fa-file-lines"></i> Assignments</h3>
+                </div>
+                <div id="dashboardAssignmentsPreview" class="dashboard-preview-list">Loading assignments…</div>
+            </div>
+            <div class="widget">
+                <div class="widget-header">
+                    <h3><i class="fa-solid fa-bell"></i> Important reminders</h3>
+                </div>
+                <div id="dashboardReminders" class="dashboard-preview-list" aria-live="polite">Loading reminders…</div>
+            </div>
+        </div>
+        <section class="widget school-ready-widget" id="schoolReady" aria-labelledby="schoolReadyTitle">
+            <div class="widget-header school-ready-header">
+                <h3 id="schoolReadyTitle"><i class="fa-solid fa-school"></i> School Ready</h3>
+                <span id="schoolReadyDate" class="school-ready-date">Preparing tomorrow…</span>
+            </div>
+            <div id="schoolReadyContent" class="school-ready-content" aria-live="polite">
+                <p class="school-ready-empty">Loading your timetable and tasks…</p>
+            </div>
+            <div class="school-ready-footer">
+                <div class="school-ready-progress-wrap">
+                    <div class="school-ready-progress-label"><span>Bag progress</span><strong id="schoolReadyProgressText">0/0 items packed</strong></div>
+                    <div class="school-ready-progress" role="progressbar" aria-label="School bag packing progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="schoolReadyProgressBar"></span></div>
+                </div>
+                <button type="button" class="btn-primary school-ready-button" id="schoolReadyButton"><i class="fa-solid fa-check"></i> I'm Ready</button>
+            </div>
+        </section>
+        <!-- ====================
              TODAY TIMETABLE
         ===================== -->
 
@@ -384,7 +462,7 @@
 
                     <i class="fa-solid fa-calendar-days"></i>
 
-                    Today's Timetable
+                    <span id="todayTimetableHeading">Today's Timetable</span>
 
                 </h3>
 
@@ -396,7 +474,7 @@
 
                     <tr>
 
-                        <th>Time</th>
+                        <th id="todayTimetableTimeHeading">Time</th>
 
                         <th>Subject</th>
 
@@ -410,7 +488,10 @@
 
                         <td colspan="2">
 
-                            No timetable generated.
+                            <div class="timetable-empty-state">
+                                <span>No timetable is scheduled for today.</span>
+                                <button type="button" class="btn-outline" id="openTimetableGenerator">Generate a timetable</button>
+                            </div>
 
                         </td>
 
@@ -446,6 +527,12 @@
 
                 No upcoming exams.
 
+            </div>
+
+            <div class="dashboard-exam-revision">
+                <h4><i class="fa-solid fa-book-open-reader"></i> Exam &amp; Revision</h4>
+                <div id="dashboardRevisionPreview" class="dashboard-revision-preview" aria-live="polite">Loading revision progress…</div>
+                <button type="button" class="btn-outline" id="openRevisionManager">Open revision manager</button>
             </div>
 
         </div>
@@ -492,7 +579,7 @@
 
             <h2>
                 <i class="fa-solid fa-wand-magic-sparkles"></i>
-                Smart AI Timetable Generator
+                FocusGrid Timetable Generator
             </h2>
 
             <p>
@@ -638,6 +725,33 @@
                 Click the button below to automatically create your timetable.
 
             </p>
+
+            <div class="form-group">
+                <label for="scheduleStartTime">Your available study window</label>
+                <div class="form-row">
+                    <input type="time" id="scheduleStartTime" value="16:00" aria-label="Study start time">
+                    <span>to</span>
+                    <input type="time" id="scheduleEndTime" value="22:00" aria-label="Study end time">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Days available</label>
+                <div class="form-row" id="scheduleDays">
+                    <label><input type="checkbox" name="studyDays" value="Monday" checked> Mon</label>
+                    <label><input type="checkbox" name="studyDays" value="Tuesday" checked> Tue</label>
+                    <label><input type="checkbox" name="studyDays" value="Wednesday" checked> Wed</label>
+                    <label><input type="checkbox" name="studyDays" value="Thursday" checked> Thu</label>
+                    <label><input type="checkbox" name="studyDays" value="Friday" checked> Fri</label>
+                    <label><input type="checkbox" name="studyDays" value="Saturday" checked> Sat</label>
+                    <label><input type="checkbox" name="studyDays" value="Sunday" checked> Sun</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="scheduleBreakMinutes">Break between subjects (minutes)</label>
+                <input type="number" id="scheduleBreakMinutes" min="0" max="120" step="5" value="15">
+            </div>
 
             <button
                 id="generateBtn"
@@ -1056,6 +1170,37 @@
 
         </div>
 
+        <div class="widget revision-manager">
+            <div class="widget-header">
+                <h3><i class="fa-solid fa-book-open-reader"></i> Exam &amp; Revision Manager</h3>
+                <span id="revisionSummary" class="revision-summary">Loading revision progress…</span>
+            </div>
+
+            <form id="addRevisionForm" class="revision-form">
+                <div class="form-group">
+                    <label for="revisionExam">Exam</label>
+                    <select id="revisionExam" required>
+                        <option value="">Loading exams…</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="revisionTopic">Topic or chapter</label>
+                    <input type="text" id="revisionTopic" maxlength="160" placeholder="e.g. Quadratic equations" required>
+                </div>
+                <div class="form-group">
+                    <label for="revisionDate">Plan for (optional)</label>
+                    <input type="date" id="revisionDate">
+                </div>
+                <button type="submit" class="btn-primary" id="addRevisionButton">
+                    <i class="fa-solid fa-plus"></i> Add to plan
+                </button>
+            </form>
+
+            <div id="revisionGroups" class="revision-groups" aria-live="polite">
+                <p class="revision-empty">Loading your revision plan…</p>
+            </div>
+        </div>
+
     </section>
 
 
@@ -1312,7 +1457,7 @@
                     class="btn-primary"
                     id="settingsThemeToggle">
 
-                    🌙 Toggle Dark Mode
+                    Toggle Dark Mode
 
                 </button>
 
@@ -1390,13 +1535,13 @@
 
         <p>
 
-            © 2026 Smart Timetable AI
+            © 2026 FocusGrid
 
         </p>
 
         <p>
 
-            Made with ❤️ using Flask &amp; SQLite
+            Made with care for focused learning
 
         </p>
 

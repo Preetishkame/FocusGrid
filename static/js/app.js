@@ -1,6 +1,6 @@
 // =========================================
 // app.js
-// Smart Timetable AI
+// FocusGrid
 // =========================================
 
 
@@ -9,6 +9,20 @@
 // -----------------------------
 
 const themeToggle = document.getElementById("themeToggle");
+
+const focusGridTaglines = [
+    "Grid Your Goals, Master Your Time.",
+    "Intelligent Academic Flow.",
+    "Precision Planning for Smart Learners."
+];
+const focusGridTagline = document.getElementById("focusgrid-tagline");
+if (focusGridTagline) {
+    let focusGridTaglineIndex = 0;
+    window.setInterval(() => {
+        focusGridTaglineIndex = (focusGridTaglineIndex + 1) % focusGridTaglines.length;
+        focusGridTagline.textContent = focusGridTaglines[focusGridTaglineIndex];
+    }, 4500);
+}
 
 function loadTheme(){
 
