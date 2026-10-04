@@ -15,6 +15,7 @@ Smart Timetable AI helps students organize their studies by managing homework, a
 * 📚 Exam Schedule & Reminders
 * 📊 Attendance Calculator
 * 🤖 AI Study Timetable Generator
+* 🎒 School Ready Checklist
 * 📈 Dashboard Overview
 * 🗄️ PostgreSQL Database
 * 📱 Responsive Design
@@ -160,16 +161,9 @@ The database connection can be configured using environment variables, making th
 
 Smart Timetable AI can be improved further by adding more useful features in the future.
 
-### 🎒 Smart Bag Reminder
-
-A future **Bag Reminder** feature could check the student's timetable for the next school day and remind them which books, notebooks, practical files and other required items they need to take to school.
-
-For example, if the next day's timetable contains Mathematics, Science and English, the application could remind the student to pack the required books and notebooks.
-
 Other possible improvements include:
 
 * 🔔 Notification and reminder alerts
-* 🎒 Smart Bag Reminder
 * 📅 Calendar integration
 * 🤖 More personalized AI study recommendations
 * 📈 Study progress tracking
@@ -211,3 +205,20 @@ Class 10 Student
 ## 📄 License
 
 This project is created for educational purposes and school projects.
+
+---
+
+## 🎒 School Ready
+
+**School Ready** combines the school bag checklist and before-you-leave reminders into one dashboard feature. It prepares a checklist for the next calendar day using the student's existing timetable, homework, assignments, and exams.
+
+The panel can show:
+
+* Tomorrow's date and day
+* The first scheduled class and its time
+* Notebooks needed for tomorrow's subjects
+* Homework and assignments due tomorrow
+* Exams or tests scheduled for tomorrow
+* Helpful reminders, such as leaving on time and keeping due work ready
+
+Checklist items can be checked or unchecked. The packed count and progress bar update immediately, and the **I'm Ready** button marks the remaining items as ready. Checklist progress is saved in the browser for that date, so refreshing the dashboard does not clear it. A new checklist is shown for each date.
