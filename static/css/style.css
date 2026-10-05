@@ -3504,3 +3504,1119 @@ body{
 }
 
 }
+/* =========================================================
+   FOCUSGRID - FINAL MOBILE RESPONSIVE CSS
+   ========================================================= */
+
+
+/* =========================================================
+   1. GLOBAL RESPONSIVE SAFETY
+   ========================================================= */
+
+html {
+    overflow-x: hidden;
+}
+
+body {
+    overflow-x: hidden;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+img,
+svg,
+video {
+    max-width: 100%;
+    height: auto;
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+.widget,
+.card,
+.dashboard-grid,
+.page-header,
+.topbar,
+.topbar > div,
+.topbar-actions,
+.form-row,
+.school-ready-content,
+.school-ready-footer,
+.revision-form,
+.revision-groups {
+    min-width: 0;
+}
+
+
+/* =========================================================
+   2. LARGE TABLETS / SMALL LAPTOPS
+   1200px
+   ========================================================= */
+
+@media (max-width: 1200px) {
+
+    .sidebar {
+        width: 240px !important;
+    }
+
+    .main-content {
+        margin-left: 240px !important;
+        width: calc(100% - 240px) !important;
+    }
+
+    .dashboard-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .widget {
+        min-width: 0;
+    }
+
+    .topbar {
+        gap: 20px;
+    }
+
+    .topbar-actions {
+        flex-wrap: wrap;
+    }
+
+}
+
+
+/* =========================================================
+   3. TABLET
+   992px
+   ========================================================= */
+
+@media (max-width: 992px) {
+
+    /* -------------------------
+       APP LAYOUT
+       ------------------------- */
+
+    .app-shell {
+        display: block !important;
+        width: 100% !important;
+        min-height: 100vh;
+    }
+
+    /* -------------------------
+       SIDEBAR
+       ------------------------- */
+
+    .sidebar {
+        position: sticky !important;
+        top: 0;
+        z-index: 1000;
+
+        width: 100% !important;
+        height: auto !important;
+        min-height: 64px;
+
+        padding: 10px 14px !important;
+
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center;
+
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+
+        white-space: nowrap;
+
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .sidebar::-webkit-scrollbar {
+        display: none;
+    }
+
+    .sidebar-logo {
+        flex: 0 0 auto;
+        margin-right: 14px;
+    }
+
+    .sidebar-logo span {
+        display: inline-block;
+    }
+
+    .sidebar nav {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center;
+
+        width: max-content !important;
+        gap: 6px;
+
+        flex: 0 0 auto;
+    }
+
+    .sidebar nav a {
+        flex: 0 0 auto;
+        white-space: nowrap;
+    }
+
+    /* -------------------------
+       MAIN CONTENT
+       ------------------------- */
+
+    .main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+
+        padding: 0 !important;
+    }
+
+    .tab-content {
+        padding: 22px !important;
+    }
+
+    /* -------------------------
+       TOPBAR
+       ------------------------- */
+
+    .topbar {
+        position: relative;
+
+        width: 100%;
+
+        padding: 18px 22px !important;
+
+        flex-wrap: wrap;
+    }
+
+    .topbar > div:first-child {
+        flex: 1 1 100%;
+        min-width: 0;
+    }
+
+    .topbar-actions {
+        width: 100%;
+
+        display: grid !important;
+
+        grid-template-columns:
+            minmax(0, 1fr)
+            42px
+            42px
+            42px;
+
+        gap: 8px;
+
+        align-items: center;
+    }
+
+    .topbar-actions input {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    /* -------------------------
+       DASHBOARD GRID
+       ------------------------- */
+
+    .dashboard-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 16px;
+    }
+
+    /* -------------------------
+       FORMS
+       ------------------------- */
+
+    form {
+        width: 100%;
+    }
+
+    .form-row {
+        flex-wrap: wrap;
+    }
+
+    .form-row > * {
+        min-width: 0;
+    }
+
+    /* -------------------------
+       SCHOOL READY
+       ------------------------- */
+
+    .school-ready-content {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    /* -------------------------
+       REVISION
+       ------------------------- */
+
+    .revision-form {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+}
+
+
+/* =========================================================
+   4. MOBILE
+   768px
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+    /* -------------------------
+       GENERAL
+       ------------------------- */
+
+    body {
+        font-size: 14px;
+    }
+
+    .container {
+        width: 92%;
+        max-width: 100%;
+    }
+
+
+    /* =====================================================
+       SIDEBAR
+       ===================================================== */
+
+    .sidebar {
+        min-height: 58px;
+
+        padding: 8px 10px !important;
+
+        gap: 8px;
+    }
+
+    .sidebar-logo {
+        margin-right: 4px;
+    }
+
+    .sidebar-logo i {
+        font-size: 18px;
+    }
+
+    .sidebar-logo span {
+        font-size: 16px;
+    }
+
+    .sidebar nav {
+        gap: 5px;
+    }
+
+    .sidebar nav a {
+        padding: 9px 11px !important;
+
+        font-size: 12px;
+
+        border-radius: 9px;
+
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .sidebar nav a i {
+        font-size: 12px;
+    }
+
+
+    /* =====================================================
+       MAIN
+       ===================================================== */
+
+    .tab-content {
+        padding: 16px !important;
+    }
+
+
+    /* =====================================================
+       TOPBAR
+       ===================================================== */
+
+    .topbar {
+        padding: 15px 16px !important;
+
+        gap: 12px;
+    }
+
+    .topbar h2 {
+        font-size: 20px !important;
+
+        line-height: 1.35;
+
+        word-break: break-word;
+    }
+
+    .topbar p {
+        font-size: 12px;
+    }
+
+    .topbar-actions {
+        grid-template-columns:
+            minmax(0, 1fr)
+            40px
+            40px
+            40px;
+
+        gap: 6px;
+    }
+
+    .topbar-actions input {
+        height: 40px !important;
+
+        padding: 0 12px !important;
+
+        font-size: 13px;
+    }
+
+    .icon-btn {
+        width: 40px !important;
+        height: 40px !important;
+
+        min-width: 40px;
+        min-height: 40px;
+    }
+
+
+    /* =====================================================
+       DASHBOARD GRID
+       ===================================================== */
+
+    .dashboard-grid {
+        grid-template-columns: 1fr !important;
+
+        gap: 14px;
+    }
+
+    .widget {
+        width: 100%;
+
+        padding: 18px !important;
+
+        border-radius: 14px;
+
+        overflow: hidden;
+    }
+
+    .widget-header {
+        gap: 8px;
+
+        flex-wrap: wrap;
+    }
+
+    .widget-header h3 {
+        font-size: 14px;
+
+        line-height: 1.4;
+    }
+
+    .widget h1 {
+        font-size: 32px !important;
+
+        line-height: 1.15;
+    }
+
+    .widget h2 {
+        font-size: 23px !important;
+
+        word-break: break-word;
+    }
+
+    .widget p {
+        line-height: 1.55;
+    }
+
+
+    /* =====================================================
+       PAGE HEADER
+       ===================================================== */
+
+    .page-header {
+        flex-direction: column !important;
+
+        align-items: flex-start !important;
+
+        gap: 12px;
+
+        margin-bottom: 16px;
+    }
+
+    .page-header h2 {
+        font-size: 22px !important;
+
+        line-height: 1.3;
+    }
+
+    .page-header p {
+        font-size: 13px;
+
+        line-height: 1.5;
+    }
+
+    .page-header .btn-primary,
+    .page-header .btn-outline {
+        width: 100%;
+    }
+
+
+    /* =====================================================
+       BUTTONS
+       ===================================================== */
+
+    button {
+        min-height: 42px;
+    }
+
+    .btn-primary,
+    .btn-outline,
+    .btn-danger {
+        min-height: 42px;
+
+        padding: 10px 14px;
+
+        font-size: 13px;
+    }
+
+    form .btn-primary,
+    form .btn-outline,
+    form .btn-danger {
+        width: 100%;
+    }
+
+
+    /* =====================================================
+       INPUTS
+       ===================================================== */
+
+    input,
+    select,
+    textarea {
+        max-width: 100%;
+
+        font-size: 16px !important;
+    }
+
+    input,
+    select {
+        min-height: 42px;
+    }
+
+    textarea {
+        min-height: 100px;
+    }
+
+    .form-group {
+        width: 100%;
+    }
+
+    .form-group label {
+        font-size: 13px;
+
+        line-height: 1.4;
+    }
+
+
+    /* =====================================================
+       FORM ROW
+       ===================================================== */
+
+    .form-row {
+        display: flex;
+
+        flex-wrap: wrap;
+
+        gap: 10px;
+    }
+
+    .form-row input,
+    .form-row select {
+        flex: 1 1 150px;
+
+        min-width: 0;
+    }
+
+
+    /* =====================================================
+       SCHEDULE DAYS
+       ===================================================== */
+
+    #scheduleDays {
+        display: grid !important;
+
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+
+        gap: 8px;
+
+        width: 100%;
+    }
+
+    #scheduleDays label {
+        display: flex;
+
+        align-items: center;
+
+        gap: 7px;
+
+        padding: 9px 10px;
+
+        border-radius: 8px;
+
+        min-height: 40px;
+    }
+
+    #scheduleDays input[type="checkbox"] {
+        width: 17px;
+        height: 17px;
+
+        min-height: 17px;
+    }
+
+
+    /* =====================================================
+       TABLES
+       ===================================================== */
+
+    .data-table {
+        display: block !important;
+
+        width: 100% !important;
+
+        overflow-x: auto !important;
+
+        -webkit-overflow-scrolling: touch;
+
+        white-space: nowrap;
+
+        border-spacing: 0;
+    }
+
+    .data-table thead,
+    .data-table tbody {
+        width: 100%;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 11px 12px !important;
+
+        font-size: 12px !important;
+    }
+
+    .data-table th {
+        white-space: nowrap;
+    }
+
+    .data-table td {
+        white-space: nowrap;
+    }
+
+    /* Keep empty timetable message readable */
+    .timetable-empty-state {
+        white-space: normal !important;
+
+        display: flex;
+
+        flex-direction: column;
+
+        align-items: stretch;
+
+        gap: 10px;
+    }
+
+    .timetable-empty-state span {
+        line-height: 1.5;
+    }
+
+    .timetable-empty-state .btn-outline {
+        width: 100%;
+    }
+
+
+    /* =====================================================
+       SCHOOL READY
+       ===================================================== */
+
+    .school-ready-content {
+        grid-template-columns: 1fr !important;
+
+        gap: 12px;
+    }
+
+    .school-ready-header {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+    .school-ready-date {
+        font-size: 12px;
+    }
+
+    .school-ready-footer {
+        flex-direction: column;
+
+        align-items: stretch;
+
+        gap: 14px;
+    }
+
+    .school-ready-progress-wrap {
+        width: 100%;
+    }
+
+    .school-ready-button {
+        width: 100% !important;
+
+        min-width: 0 !important;
+    }
+
+
+    /* =====================================================
+       REVISION MANAGER
+       ===================================================== */
+
+    .revision-form {
+        grid-template-columns: 1fr !important;
+
+        gap: 12px;
+    }
+
+    .revision-manager .widget-header {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+    .revision-summary {
+        width: 100%;
+
+        font-size: 12px;
+    }
+
+    .revision-groups {
+        width: 100%;
+
+        overflow: hidden;
+    }
+
+
+    /* =====================================================
+       DASHBOARD PREVIEWS
+       ===================================================== */
+
+    .dashboard-preview-list {
+        width: 100%;
+
+        overflow-wrap: anywhere;
+
+        word-break: break-word;
+    }
+
+    .dashboard-revision-preview {
+        width: 100%;
+
+        overflow-wrap: anywhere;
+    }
+
+
+    /* =====================================================
+       TOAST
+       ===================================================== */
+
+    .toast-container {
+        position: fixed !important;
+
+        top: 10px !important;
+        left: 10px !important;
+        right: 10px !important;
+
+        width: auto !important;
+
+        z-index: 99999;
+    }
+
+    .toast {
+        width: 100% !important;
+
+        min-width: 0 !important;
+
+        max-width: 100% !important;
+
+        word-break: break-word;
+    }
+
+
+    /* =====================================================
+       LOADING SCREEN
+       ===================================================== */
+
+    .loading-screen {
+        padding: 20px;
+    }
+
+
+    /* =====================================================
+       FOOTER
+       ===================================================== */
+
+    .dashboard-footer {
+        padding: 20px 16px !important;
+
+        text-align: center;
+
+        flex-direction: column;
+
+        gap: 5px;
+    }
+
+}
+
+
+/* =========================================================
+   5. SMALL PHONES
+   576px
+   ========================================================= */
+
+@media (max-width: 576px) {
+
+    /* -------------------------
+       SIDEBAR
+       ------------------------- */
+
+    .sidebar {
+        min-height: 55px;
+
+        padding: 7px 8px !important;
+    }
+
+    .sidebar-logo span {
+        font-size: 14px;
+    }
+
+    .sidebar-logo i {
+        font-size: 16px;
+    }
+
+    .sidebar nav a {
+        padding: 8px 10px !important;
+
+        font-size: 11px;
+
+        gap: 5px;
+    }
+
+    .sidebar nav a i {
+        font-size: 11px;
+    }
+
+
+    /* -------------------------
+       TOPBAR
+       ------------------------- */
+
+    .topbar {
+        padding: 13px 14px !important;
+    }
+
+    .topbar h2 {
+        font-size: 18px !important;
+    }
+
+    .topbar-actions {
+        grid-template-columns:
+            minmax(0, 1fr)
+            38px
+            38px
+            38px;
+
+        gap: 5px;
+    }
+
+    .topbar-actions input {
+        height: 38px !important;
+
+        font-size: 12px !important;
+    }
+
+    .icon-btn {
+        width: 38px !important;
+        height: 38px !important;
+
+        min-width: 38px;
+        min-height: 38px;
+    }
+
+
+    /* -------------------------
+       CONTENT
+       ------------------------- */
+
+    .tab-content {
+        padding: 12px !important;
+    }
+
+    .widget {
+        padding: 16px !important;
+
+        border-radius: 13px;
+    }
+
+    .widget h1 {
+        font-size: 29px !important;
+    }
+
+    .widget h2 {
+        font-size: 21px !important;
+    }
+
+    .widget-header h3 {
+        font-size: 13px;
+    }
+
+
+    /* -------------------------
+       PAGE HEADERS
+       ------------------------- */
+
+    .page-header h2 {
+        font-size: 19px !important;
+    }
+
+    .page-header p {
+        font-size: 12px;
+    }
+
+
+    /* -------------------------
+       SCHEDULE DAYS
+       ------------------------- */
+
+    #scheduleDays {
+        grid-template-columns: 1fr 1fr !important;
+    }
+
+
+    /* -------------------------
+       BUTTONS
+       ------------------------- */
+
+    .btn-primary,
+    .btn-outline,
+    .btn-danger {
+        font-size: 12px;
+
+        padding: 10px 12px;
+    }
+
+
+    /* -------------------------
+       TABLES
+       ------------------------- */
+
+    .data-table th,
+    .data-table td {
+        padding: 10px !important;
+
+        font-size: 11px !important;
+    }
+
+
+    /* -------------------------
+       AUTH / COMMON BOXES
+       ------------------------- */
+
+    .auth-container {
+        padding: 18px 12px !important;
+    }
+
+    .auth-box {
+        padding: 22px 16px !important;
+
+        border-radius: 15px;
+    }
+
+}
+
+
+/* =========================================================
+   6. VERY SMALL PHONES
+   400px
+   ========================================================= */
+
+@media (max-width: 400px) {
+
+    .sidebar-logo span {
+        display: none;
+    }
+
+    .sidebar-logo {
+        margin-right: 2px;
+    }
+
+    .sidebar nav a {
+        padding: 8px 9px !important;
+
+        font-size: 10px;
+    }
+
+    .sidebar nav a i {
+        font-size: 10px;
+    }
+
+
+    .topbar-actions {
+        grid-template-columns:
+            minmax(0, 1fr)
+            36px
+            36px
+            36px;
+    }
+
+    .icon-btn {
+        width: 36px !important;
+        height: 36px !important;
+
+        min-width: 36px;
+        min-height: 36px;
+    }
+
+    .topbar-actions input {
+        height: 36px !important;
+    }
+
+
+    .tab-content {
+        padding: 10px !important;
+    }
+
+    .widget {
+        padding: 14px !important;
+    }
+
+
+    #scheduleDays {
+        grid-template-columns: 1fr !important;
+    }
+
+
+    .data-table th,
+    .data-table td {
+        padding: 9px 10px !important;
+
+        font-size: 10px !important;
+    }
+
+}
+
+
+/* =========================================================
+   7. LANDSCAPE PHONE
+   ========================================================= */
+
+@media (max-width: 768px) and (orientation: landscape) {
+
+    .sidebar {
+        position: sticky !important;
+    }
+
+    .dashboard-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    .school-ready-content {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+}
+
+
+/* =========================================================
+   8. ACCESSIBILITY / TOUCH
+   ========================================================= */
+
+@media (hover: none) and (pointer: coarse) {
+
+    .sidebar nav a,
+    button,
+    .icon-btn,
+    .btn-primary,
+    .btn-outline,
+    .btn-danger {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .sidebar nav a {
+        min-height: 40px;
+    }
+
+    button {
+        cursor: pointer;
+    }
+
+}
+
+
+/* =========================================================
+   9. PREVENT LONG TEXT FROM BREAKING MOBILE UI
+   ========================================================= */
+
+#smartRecommendations,
+#dashboardHomeworkPreview,
+#dashboardAssignmentsPreview,
+#dashboardReminders,
+#dashboardRevisionPreview,
+#upcomingExams,
+#pendingAssignments,
+#revisionGroups,
+#schoolReadyContent {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+
+/* =========================================================
+   10. MOBILE PROGRESS BARS
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+    .progress-container {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .progress-bar {
+        min-width: 0;
+    }
+
+}
+
+
+/* =========================================================
+   11. MOBILE FOOTER
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+    .dashboard-footer p {
+        margin: 2px 0;
+    }
+
+}
+
+
+/* =========================================================
+   END - FOCUSGRID MOBILE RESPONSIVE PATCH
+   ========================================================= */
