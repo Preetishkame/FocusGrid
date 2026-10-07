@@ -1,10 +1,8 @@
 from flask import Flask, make_response, render_template, request, redirect, url_for, session, flash, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
-import re
-import sqlite3
 
 try:
     import psycopg2
@@ -13,85 +11,62 @@ except ImportError:
     psycopg2 = None
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "student_timetable_ai_secret_key")
-# Keep edited templates visible during local use even when Flask debug mode is off.
+
+# ------------------------------------------------------------------
+# PRODUCTION CONFIGURATION
+# ------------------------------------------------------------------
+# Keep SECRET_KEY fixed in Render Environment Variables. Never generate
+# a new secret on every restart, otherwise existing sessions can break.
+SECRET_KEY = os.environ.get("SECRET_KEY", "").strip()
+if not SECRET_KEY:
+    raise RuntimeError(
+        "SECRET_KEY is missing. Add a permanent SECRET_KEY in Render Environment Variables."
+    )
+
+app.secret_key = SECRET_KEY
 app.config["TEMPLATES_AUTO_RELOAD"] = True
-
-LOCAL_DB_PATH = os.environ.get(
-    "LOCAL_SQLITE_PATH",
-    os.path.join(os.path.dirname(os.path.abspath(__file__)), "student_timetable_test.db")
-)
-
-
-class SQLiteCompatCursor:
-    """Translate the app's small PostgreSQL SQL subset for local SQLite testing."""
-    def __init__(self, cursor):
-        self._cursor = cursor
-
-    @staticmethod
-    def _sqlite_sql(sql):
-        sql = re.sub(r"\bBIGSERIAL\s+PRIMARY\s+KEY\b", "INTEGER PRIMARY KEY AUTOINCREMENT", sql, flags=re.I)
-        sql = re.sub(r"\bTIMESTAMPTZ\b", "TEXT", sql, flags=re.I)
-        sql = re.sub(r"\bDOUBLE\s+PRECISION\b", "REAL", sql, flags=re.I)
-        sql = re.sub(r"\bBIGINT\b", "INTEGER", sql, flags=re.I)
-        sql = re.sub(r"\bILIKE\b", "LIKE", sql, flags=re.I)
-        return sql.replace("%s", "?")
-
-    def execute(self, sql, params=()):
-        self._cursor.execute(self._sqlite_sql(sql), params)
-        return self
-
-    def fetchone(self): return self._cursor.fetchone()
-    def fetchall(self): return self._cursor.fetchall()
-    def __enter__(self): return self
-    def __exit__(self, exc_type, exc, tb): self._cursor.close()
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["SESSION_COOKIE_SECURE"] = os.environ.get("SESSION_COOKIE_SECURE", "true").lower() in {
+    "1", "true", "yes", "on"
+}
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=30)
+app.config["SESSION_REFRESH_EACH_REQUEST"] = True
 
 
-class SQLiteCompatConnection:
-    def __init__(self, path):
-        self._connection = sqlite3.connect(path, timeout=10)
-        self._connection.row_factory = sqlite3.Row
-        self._connection.execute("PRAGMA foreign_keys = ON")
-
-    def cursor(self): return SQLiteCompatCursor(self._connection.cursor())
-    def commit(self): return self._connection.commit()
-    def rollback(self): return self._connection.rollback()
-    def close(self): return self._connection.close()
-
-
-def using_local_sqlite():
-    return not os.environ.get("DATABASE_URL", "").strip()
-
-# Render PostgreSQL provides DATABASE_URL automatically when the database is linked.
-# Local development can also use DATABASE_URL from a .env/environment variable.
 def get_database_url():
-    """Return a normalized PostgreSQL connection URL."""
+    """Return the required PostgreSQL connection URL."""
     database_url = os.environ.get("DATABASE_URL", "").strip()
 
     if not database_url:
         raise RuntimeError(
-            "DATABASE_URL is not set. Please configure the DATABASE_URL "
-            "environment variable."
+            "DATABASE_URL is missing. Add your Render PostgreSQL Internal Database URL "
+            "to the web service Environment Variables."
         )
 
+    # Some providers still return the old postgres:// scheme.
     if database_url.startswith("postgres://"):
         database_url = "postgresql://" + database_url[len("postgres://"):]
 
-    return database_url 
+    return database_url
 
 
 def get_db():
-    """Use local SQLite for development; use Render PostgreSQL when DATABASE_URL exists."""
-    if using_local_sqlite():
-        return SQLiteCompatConnection(LOCAL_DB_PATH)
-
+    """Open a PostgreSQL connection. Production never silently falls back to SQLite."""
     if psycopg2 is None:
-        raise RuntimeError("psycopg2 is not installed. Add psycopg2-binary to requirements.txt.")
+        raise RuntimeError(
+            "psycopg2 is not installed. Add psycopg2-binary to requirements.txt."
+        )
 
     return psycopg2.connect(
         get_database_url(),
         cursor_factory=RealDictCursor,
-        sslmode=os.environ.get("PGSSLMODE", "require")
+        sslmode=os.environ.get("PGSSLMODE", "require"),
+        connect_timeout=10,
+        keepalives=1,
+        keepalives_idle=30,
+        keepalives_interval=10,
+        keepalives_count=5,
     )
 
 
@@ -307,6 +282,7 @@ def login():
 
         if user and check_password_hash(user["password"], password):
             session.clear()
+            session.permanent = True
             session["user_id"] = user["id"]
             session["user_name"] = user["name"]
             return redirect(url_for("dashboard"))
@@ -885,13 +861,9 @@ def internal_error(error):
 
 
 # Initialize PostgreSQL when the Flask process starts.
-# This is intentionally outside if __name__ == '__main__' so it also works with Gunicorn on Render.
-try:
-    init_db()
-except Exception as startup_error:
-    # Do not prevent Gunicorn from starting if PostgreSQL is temporarily unavailable.
-    # The first database request will return an appropriate error instead.
-    print(f"[DATABASE STARTUP WARNING] {startup_error}")
+# Failing fast here prevents Render from running a broken service with a
+# missing/wrong database configuration and silently losing user accounts.
+init_db()
 
 
 if __name__ == "__main__":
