@@ -68,7 +68,7 @@ Smart-Timetable-AI/
 Open your browser
 
 ```
-https://student-timetable-ai.onrender.com/
+https://focusgrid-for-students.onrender.com/
 ```
 
 
